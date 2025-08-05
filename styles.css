@@ -1,0 +1,6 @@
+body { font-family: Arial, sans-serif; }
+.anime-container { display: flex; flex-wrap: wrap; gap: 20px; }
+.anime-card { width: 200px; cursor: pointer; }
+.anime-card img { width: 100%; border-radius: 8px; }
+.anime-poster { max-width: 300px; }
+.episode { padding: 10px; border-bottom: 1px solid #ccc; }
