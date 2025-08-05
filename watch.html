@@ -1,0 +1,38 @@
+<body>
+    <div id="video-player"></div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const animeId = urlParams.get('animeId');
+        const episodeId = urlParams.get('episodeId');
+        const platform = urlParams.get('platform');
+
+        // Получение данных эпизода
+        db.collection("anime").doc(animeId).collection("episodes")
+            .doc(episodeId).get().then(doc => {
+                const episode = doc.data();
+                const playerContainer = document.getElementById('video-player');
+                
+                if (platform === 'youtube') {
+                    playerContainer.innerHTML = `
+                        <iframe 
+                            width="100%" 
+                            height="500" 
+                            src="https://www.youtube.com/embed/${episode.youtubeVideoId}" 
+                            frameborder="0" 
+                            allowfullscreen>
+                        </iframe>
+                    `;
+                } else if (platform === 'vk') {
+                    playerContainer.innerHTML = `
+                        <iframe 
+                            src="https://vk.com/video_ext.php?${episode.vkVideoId}" 
+                            width="100%" 
+                            height="500" 
+                            frameborder="0" 
+                            allowfullscreen>
+                        </iframe>
+                    `;
+                }
+            });
+    </script>
+</body>
