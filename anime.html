@@ -1,0 +1,38 @@
+<body>
+    <div id="anime-detail"></div>
+    <div id="episodes-list"></div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const animeId = urlParams.get('id');
+        
+        // Загрузка данных аниме
+        db.collection("anime").doc(animeId).get().then(doc => {
+            const anime = doc.data();
+            document.getElementById('anime-detail').innerHTML = `
+                <img src="${anime.poster}" class="anime-poster">
+                <h1>${anime.title}</h1>
+                <p>${anime.description}</p>
+            `;
+        });
+
+        // Загрузка эпизодов
+        db.collection("anime").doc(animeId).collection("episodes")
+            .get().then(snapshot => {
+                snapshot.forEach(epDoc => {
+                    const episode = epDoc.data();
+                    const epElement = document.createElement('div');
+                    epElement.className = 'episode';
+                    epElement.innerHTML = `
+                        <h3>${episode.title}</h3>
+                        <button onclick="watchEpisode('${animeId}', '${epDoc.id}', 'youtube')">YouTube</button>
+                        <button onclick="watchEpisode('${animeId}', '${epDoc.id}', 'vk')">VK</button>
+                    `;
+                    document.getElementById('episodes-list').appendChild(epElement);
+                });
+            });
+
+        function watchEpisode(animeId, episodeId, platform) {
+            window.location.href = `watch.html?animeId=${animeId}&episodeId=${episodeId}&platform=${platform}`;
+        }
+    </script>
+</body>
