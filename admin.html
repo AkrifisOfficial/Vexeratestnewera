@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>VexeraDubbing - Админка</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        form { max-width: 500px; margin: 20px 0; }
+        input, textarea, button { width: 100%; padding: 10px; margin: 5px 0; }
+        button { background: #4285F4; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Админ-панель VexeraDubbing</h1>
+    <button onclick="logout()">Выйти</button>
+    
+    <h2>Добавить аниме</h2>
+    <form id="add-anime-form">
+        <input type="text" id="title" placeholder="Название" required>
+        <textarea id="description" placeholder="Описание" required></textarea>
+        <input type="text" id="poster" placeholder="URL постера" required>
+        <input type="number" id="year" placeholder="Год" required>
+        <input type="text" id="genre" placeholder="Жанры (через запятую)" required>
+        <button type="submit">Добавить</button>
+    </form>
+
+    <h2>Список аниме</h2>
+    <div id="anime-list"></div>
+
+    <script src="firebase.js"></script>
+    <script>
+        // Проверка авторизации
+        import { onAuthStateChanged } from "firebase/auth";
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) window.location.href = "login.html";
+        });
+
+        // Выход
+        function logout() {
+            auth.signOut().then(() => window.location.href = "login.html");
+        }
+
+        // Добавление аниме
+        document.getElementById("add-anime-form").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const anime = {
+                title: document.getElementById("title").value,
+                description: document.getElementById("description").value,
+                poster: document.getElementById("poster").value,
+                year: parseInt(document.getElementById("year").value),
+                genre: document.getElementById("genre").value.split(",").map(g => g.trim())
+            };
+            db.collection("anime").add(anime)
+                .then(() => alert("Аниме добавлено!"))
+                .catch(err => alert("Ошибка: " + err));
+        });
+
+        // Загрузка списка аниме для админа (с кнопкой удаления)
+        db.collection("anime").onSnapshot(snapshot => {
+            const list = document.getElementById("anime-list");
+            list.innerHTML = "";
+            snapshot.forEach(doc => {
+                const anime = doc.data();
+                const div = document.createElement("div");
+                div.innerHTML = `
+                    <h3>${anime.title} (${anime.year})</h3>
+                    <p>${anime.description}</p>
+                    <button onclick="deleteAnime('${doc.id}')">Удалить</button>
+                `;
+                list.appendChild(div);
+            });
+        });
+
+        function deleteAnime(id) {
+            if (confirm("Удалить аниме?")) {
+                db.collection("anime").doc(id).delete();
+            }
+        }
+    </script>
+</body>
+</html>
